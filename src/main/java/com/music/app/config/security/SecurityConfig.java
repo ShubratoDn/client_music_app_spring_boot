@@ -36,7 +36,7 @@ public class SecurityConfig {
                          .requestMatchers("/verification", "/forgot-password", "/verify-otp", "/verify-forget-password","/reset-password").permitAll()
                          .anyRequest().authenticated()
          )
-         .logout(logout -> logout.logoutUrl("/logout"))
+         .logout(logout -> logout.logoutUrl("/logout").logoutSuccessUrl("/login"))
          .formLogin(login -> login
 					.loginPage("/login").permitAll()
                  .defaultSuccessUrl("/")
