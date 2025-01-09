@@ -2,6 +2,8 @@ package com.music.app.controller;
 
 import com.music.app.entity.User;
 import com.music.app.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,11 +21,22 @@ public class AuthController {
 
     @Autowired
     private UserService userService;
-    @GetMapping("/login")
-    public String loginView() {
-        return "login";
-    }
 
+    @GetMapping("/login")
+    public String login(HttpServletRequest request, Model model) {
+        // Retrieve the error message from the session
+        HttpSession session = request.getSession();
+        String errorMessage = (String) session.getAttribute("error");
+
+        // Add the error message to the model for Thymeleaf rendering
+        if (errorMessage != null) {
+            model.addAttribute("error", errorMessage);
+            // Remove the error message from the session
+            session.removeAttribute("error");
+        }
+
+        return "login"; // Thymeleaf login page name
+    }
     @GetMapping("/register")
     public String showRegistrationForm(Model model) {
         if (!model.containsAttribute("formData")) {

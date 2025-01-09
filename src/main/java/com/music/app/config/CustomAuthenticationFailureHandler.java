@@ -23,7 +23,6 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
         }
 
         request.getSession().setAttribute("error", errorMessage);
-        System.out.println("\n\n\nEERR  : " + errorMessage);
         response.sendRedirect("/login?error=true");
     }
 }
