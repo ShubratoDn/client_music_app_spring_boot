@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="base::layout(~{::title}, ~{::main})">
+    <head>
+        <title>Add Album</title>
+    </head>
+    <body>
+
+    <main>
+        <div class="container-fluid px-4">
+            <h1 class="mt-4">Add Album</h1>
+            <ol class="breadcrumb mb-4">
+                <li class="breadcrumb-item active">Add Album</li>
+            </ol>
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-album"></i> Upload New Album
+                </div>
+                <div class="card-body">
+                    <form action="/albums/upload" method="post" enctype="multipart/form-data">
+                        <!-- Success Alert -->
+                        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                            <span th:text="${success}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+
+                        <!-- Error Alert -->
+                        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <span th:text="${error}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+
+                        <!-- Album Name -->
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Album Name</label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="name"
+                                   name="name"
+                                   placeholder="Enter album name"
+                                   th:value="${album?.name}"
+                                   >
+                        </div>
+
+                        <!-- Artist -->
+                        <div class="mb-3">
+                            <label for="artist" class="form-label">Artist</label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="artist"
+                                   name="artist"
+                                   placeholder="Enter artist name"
+                                   th:value="${album?.artist}"
+                                   >
+                        </div>
+
+                        <!-- Cover Image -->
+                        <div class="mb-3">
+                            <label for="coverImage" class="form-label">Cover Image</label>
+                            <input type="file"
+                                   class="form-control"
+                                   id="coverImage"
+                                   name="coverImage"
+                                   accept="image/*"
+                                   >
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-primary">Upload Album</button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+
+    </body>
+</html>

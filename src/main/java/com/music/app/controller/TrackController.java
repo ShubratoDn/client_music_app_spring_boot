@@ -1,5 +1,7 @@
 package com.music.app.controller;
 
+import com.music.app.entity.Track;
+import com.music.app.service.AlbumService;
 import com.music.app.service.TrackService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -12,16 +14,21 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/tracks")
 public class TrackController {
 
     @Autowired
     private TrackService trackService;
+    @Autowired
+    private AlbumService albumService;
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/upload")
-    public String showAddTrackForm() {
+    public String showAddTrackForm(Model model) {
+        model.addAttribute("albums", albumService.getAllAlbums());
         return "add-track";
     }
 
@@ -81,4 +88,10 @@ public class TrackController {
     }
 
 
+    @GetMapping
+    public String getAllTracks(Model model) {
+        List<Track> tracks = trackService.getAllTracks();
+        model.addAttribute("tracks", tracks);
+        return "tracks-list";
+    }
 }

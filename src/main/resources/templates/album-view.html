@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="base::layout(~{::title}, ~{::main})">
+    <head>
+        <title>Album View</title>
+    </head>
+    <body>
+
+        <main>
+            <div class="container-fluid px-4">
+                <h1 class="mt-4">Album Details</h1>
+                <ol class="breadcrumb mb-4">
+                    <li class="breadcrumb-item"><a href="/albums">Albums</a></li>
+                    <li class="breadcrumb-item active" th:text="${album.name}">Album Title</li>
+                </ol>
+
+                <!-- Success or Error Message -->
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <span th:text="${error}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-music"></i> Album Details
+                    </div>
+                    <div class="card-body">
+                        <!-- Album Cover Image -->
+                        <img class="card-img-top mb-3" th:src="@{${album.coverImageUrl}}" alt="Album Cover" style="max-width: 300px;">
+
+                        <!-- Album Title and Artist -->
+                        <h3 th:text="${album.name}">Album Name</h3>
+                        <p>Artist: <span th:text="${album.artist}">Artist Name</span></p>
+
+
+                        <!-- Track List -->
+                        <h4>Tracks</h4>
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th scope="col">Track Name</th>
+                                <th scope="col">Duration</th>
+                                <th scope="col">Audio</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="track : ${album.tracks}">
+                                <td th:text="${track.name}">Track Name</td>
+                                <td th:text="${track.duration}">Track Duration</td>
+                                <td>
+                                    <a th:href="@{${track.audioUrl}}" class="btn btn-primary" target="_blank">Play</a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+    </body>
+</html>

@@ -7,18 +7,14 @@
 
         <main>
             <div class="container-fluid px-4">
-                <h1 class="mt-4">Music App</h1>
+                <h1 class="mt-4"> Albums</h1>
                 <ol class="breadcrumb mb-4">
-                    <li class="breadcrumb-item active">Dashboard</li>
+                    <li class="breadcrumb-item active">Album List</li>
                 </ol>
                 <div class="card mb-4">
-                    <div class="card-header">
-                        <i class="fas fa-table me-1"></i>
-                        Albums
-                    </div>
                     <div class="card-body">
-                       <h1>Album List</h1>
                         <div class="row">
+                            <!-- Iterate over the albums -->
                             <div class="col-sm-6 col-md-4" th:each="album : ${albums}">
                                 <div class="card">
                                     <div class="card-body">
