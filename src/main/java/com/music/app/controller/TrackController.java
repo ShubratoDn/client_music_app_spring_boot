@@ -7,10 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -36,7 +33,7 @@ public class TrackController {
     @PostMapping("/upload")
     public String uploadTrack(
             @RequestParam("name") String name,
-            @RequestParam("duration") String duration,
+            @RequestParam(value = "duration", required = false) String duration,
             @RequestParam(value = "albumId", required = false) Long albumId,
             @RequestParam("audioFile") MultipartFile audioFile,
             RedirectAttributes redirectAttributes,
@@ -94,4 +91,74 @@ public class TrackController {
         model.addAttribute("tracks", tracks);
         return "tracks-list";
     }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/edit/{id}")
+    public String showUpdateTrackForm(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
+        Track track = trackService.getTrackById(id);
+        if (track == null) {
+            redirectAttributes.addFlashAttribute("error", "Track not found!");
+            return "redirect:/tracks"; // Redirect to the track list if the track doesn't exist
+        }
+
+        model.addAttribute("track", track);
+        model.addAttribute("albums", albumService.getAllAlbums()); // Include albums for dropdown
+        return "update-track";
+    }
+
+
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping("/update/{id}")
+    public String updateTrack(
+            @PathVariable Long id,
+            @RequestParam("name") String name,
+            @RequestParam(value = "duration", required = false) String duration,
+            @RequestParam(value = "albumId", required = false) Long albumId,
+            @RequestParam(value = "audioFile", required = false) MultipartFile audioFile,
+            RedirectAttributes redirectAttributes,
+            Model model) {
+
+        StringBuilder errors = new StringBuilder();
+
+        // Validate name
+        if (name == null || name.trim().isEmpty()) {
+            errors.append("Track name cannot be empty. ");
+        }
+
+        // Validate audio file if provided
+        if (audioFile != null && !audioFile.isEmpty()) {
+            long fileSize = audioFile.getSize();
+            if (fileSize < 10 * 1024) {
+                errors.append("Audio file size is too small (minimum is 10 KB). ");
+            } else if (fileSize > 30 * 1024 * 1024) {
+                errors.append("Audio file size exceeds the maximum limit of 30 MB. ");
+            }
+
+            String contentType = audioFile.getContentType();
+            if (contentType == null || !contentType.startsWith("audio/")) {
+                errors.append("Invalid file type. Only audio files are allowed. ");
+            }
+        }
+
+        // If errors exist, return to the update view
+        if (errors.length() > 0) {
+            model.addAttribute("error", errors.toString());
+            model.addAttribute("track", trackService.getTrackById(id));
+            model.addAttribute("albums", albumService.getAllAlbums());
+            return "update-track";
+        }
+
+        try {
+            trackService.updateTrack(id, name, duration, albumId, audioFile);
+            redirectAttributes.addFlashAttribute("success", "Track updated successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to update track: " + e.getMessage());
+            return "redirect:/tracks/edit/" + id;
+        }
+
+        return "redirect:/tracks";
+    }
+
+
 }

@@ -95,11 +95,39 @@ public class TrackService {
         }
     }
 
+    public Track getTrackById(Long id){
+        return trackRepository.findById(id).orElse(null);
+    }
 
 
     public List<Track> getAllTracks() {
         return trackRepository.findAll();
     }
+
+
+    public void updateTrack(Long id, String name, String duration, Long albumId, MultipartFile audioFile) throws Exception {
+        Track track = trackRepository.findById(id).orElseThrow(() -> new Exception("Track not found"));
+
+        track.setName(name);
+
+        if (albumId != null) {
+            Album album = albumRepository.findById(albumId).orElseThrow(null);
+            if (album == null) {
+                throw new Exception("Album not found");
+            }
+            track.setAlbum(album);
+        }
+
+        if (audioFile != null && !audioFile.isEmpty()) {
+            // Extract the duration of the audio file
+            duration = getAudioDuration(audioFile);
+            track.setDuration(duration);
+            String audioFileUrl = saveAudioFile(audioFile);
+            track.setAudioUrl(audioFileUrl);
+        }
+        trackRepository.save(track);
+    }
+
 
 
 }

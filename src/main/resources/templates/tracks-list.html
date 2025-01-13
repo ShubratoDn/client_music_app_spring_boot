@@ -16,6 +16,18 @@
                     <i class="fas fa-music"></i> Tracks
                 </div>
                 <div class="card-body">
+                    <!-- Success Alert -->
+                    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                        <span th:text="${success}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+
+                    <!-- Error Alert -->
+                    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <span th:text="${error}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+
                     <table class="table table-bordered table-striped">
                         <thead>
                         <tr>
@@ -24,6 +36,7 @@
                             <th>Duration</th>
                             <th>Album</th>
                             <th>Artist</th>
+                            <th>Action</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -31,8 +44,12 @@
                             <td th:text="${iterStat.index + 1}"></td>
                             <td th:text="${track.name}"></td>
                             <td th:text="${track.duration}"></td>
-                            <td th:text="${track.album?.name ?: 'No Album'}"></td>
-                            <td th:text="${track.album?.artist ?: 'No Artist'}"></td>
+                            <td th:text="${track.album?.name ?: ''}"></td>
+                            <td th:text="${track.album?.artist ?: ''}"></td>
+                            <td>
+                                <a th:href="@{/tracks/edit/{id}(id=${track.id})}" class="btn btn-sm btn-primary">Edit</a>
+                            </td>
+
                         </tr>
                         </tbody>
                     </table>

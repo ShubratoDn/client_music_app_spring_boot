@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="base::layout(~{::title}, ~{::main})">
+    <head>
+        <title>Music App</title>
+    </head>
+    <body>
+
+    <main>
+        <div class="container-fluid px-4">
+            <h1 class="mt-4">Add Track</h1>
+            <ol class="breadcrumb mb-4">
+                <li class="breadcrumb-item active">Add Track</li>
+            </ol>
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-music"></i> Upload New Track
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/tracks/update/{id}(id=${track.id})}" method="post" enctype="multipart/form-data">
+                    <!-- Error Alert -->
+                        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <span th:text="${error}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+
+                        <!-- Success Alert -->
+                        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                            <span th:text="${success}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+
+                        <!-- Track Name -->
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Track Name</label>
+                            <input type="text" class="form-control" id="name" name="name" th:value="${track.name}" required>
+                        </div>
+
+
+                        <!-- Album -->
+                        <div class="mb-3">
+                            <label for="albumId" class="form-label">Album</label>
+                            <select id="albumId" name="albumId" class="form-control">
+                                <option value="" th:if="${track.album == null}" selected>-- Select Album --</option>
+                                <option th:each="album : ${albums}"
+                                        th:value="${album.id}"
+                                        th:selected="${album.id == track.album?.id}"
+                                        th:text="${album.name}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Audio File -->
+                        <div class="mb-3">
+                            <label for="audioFile" class="form-label">Audio File (optional)</label>
+                            <input type="file" class="form-control" id="audioFile" name="audioFile" accept="audio/*">
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-primary">Update Track</button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+
+    </body>
+</html>
