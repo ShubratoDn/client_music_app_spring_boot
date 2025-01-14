@@ -48,6 +48,7 @@
                             <td th:text="${track.album?.artist ?: ''}"></td>
                             <td>
                                 <a th:href="@{/tracks/edit/{id}(id=${track.id})}" class="btn btn-sm btn-primary">Edit</a>
+                                <a th:href="@{/player/music/{id}(id=${track.id})}" class="btn btn-sm btn-success">Play</a>
                             </td>
 
                         </tr>

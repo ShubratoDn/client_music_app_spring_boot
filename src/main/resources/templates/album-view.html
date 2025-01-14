@@ -47,7 +47,7 @@
                                 <td th:text="${track.name}">Track Name</td>
                                 <td th:text="${track.duration}">Track Duration</td>
                                 <td>
-                                    <a th:href="@{${track.audioUrl}}" class="btn btn-primary" target="_blank">Play</a>
+                                    <a th:href="@{/player/music/{id}(id=${track.id})}" class="btn btn-sm btn-success">Play</a>
                                 </td>
                             </tr>
                             </tbody>

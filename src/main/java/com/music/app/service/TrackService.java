@@ -104,6 +104,12 @@ public class TrackService {
         return trackRepository.findAll();
     }
 
+    public List<Track> getTracksByAlbumId(Long albumId) {
+        Album album = new Album();
+        album.setId(albumId);
+        return trackRepository.findByAlbum(album);
+    }
+
 
     public void updateTrack(Long id, String name, String duration, Long albumId, MultipartFile audioFile) throws Exception {
         Track track = trackRepository.findById(id).orElseThrow(() -> new Exception("Track not found"));

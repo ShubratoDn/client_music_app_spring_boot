@@ -32,13 +32,14 @@ public class SecurityConfig {
                  auth
                          .requestMatchers("/admin/**").hasRole("ADMIN")
                          .requestMatchers("/user/**").hasRole("USER")
-//                         .requestMatchers("/login").anonymous() //
+                         .requestMatchers("/login").anonymous() //
                          .requestMatchers("/register").permitAll()
                          .requestMatchers("/WEB-INF/**").permitAll()
                          .requestMatchers("/js/**").permitAll()
                          .requestMatchers("/css/**").permitAll()
                          .requestMatchers("/assets/**").permitAll()
-                         .requestMatchers("/verification", "/forgot-password", "/verify-otp", "/verify-forget-password","/reset-password").permitAll()
+                         .requestMatchers("/uploads/**").permitAll()
+                         .requestMatchers("/player/**").permitAll()
                          .anyRequest().authenticated()
          )
          .logout(logout -> logout.logoutUrl("/logout").logoutSuccessUrl("/login"))

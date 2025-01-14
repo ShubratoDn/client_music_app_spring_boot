@@ -97,6 +97,7 @@
             <!-- Footer -->
             <div class="sb-sidenav-footer">
                 <div class="small">Logged in as:</div>
+                <span th:text="${playlistJson}" id="playListItems"></span>
                 <span th:text="${#authentication.name}"></span>
                 <b> (<span th:text="${#authentication.principal.getUser().role}"></span>) </b>
             </div>
@@ -155,9 +156,27 @@
 
 
             <script>
+                var player ;
 
                 document.addEventListener('DOMContentLoaded', function() {
-                    document.getElementById("page-footer").style.display= 'none';
+                    // document.getElementById("page-footer").style.display= 'none';
+                    //
+                    // Fetch the JSON string from the span element
+                    var playlistText = document.getElementById("playListItems").textContent;
+
+                    // Parse the JSON string into a JavaScript object
+                    var playlist = JSON.parse(playlistText);
+
+                    // Transform the playlist for Howler.js
+                    var formattedPlaylist = playlist.map(function (item) {
+                        return {
+                            title: item.title,
+                            file: item.file,
+                            howl: null
+                        };
+                    })
+
+                    player = new Player(formattedPlaylist);
                 });
 
 
@@ -208,11 +227,11 @@
                             sound = data.howl;
                         } else {
                             sound = data.howl = new Howl({
-                                src: ['../uploads/audio/' + data.file, '../uploads/audio/' + data.file],
+                                src: ['../../../../..' + data.file, '../../../../..' + data.file],
                                 html5: true, // Force to HTML5 so that the audio can stream in (best for large files).
                                 onplay: function () {
                                     // Display the duration.
-                                    duration.innerHTML = self.formatTime(Math.round(sound.duration()));
+                                    duration.innerHTML = self.formatTime(Math.round(sound.duration() - 1));
 
                                     // Start updating the progress of the track.
                                     requestAnimationFrame(self.step.bind(self));
@@ -423,24 +442,47 @@
                     }
                 };
 
-                // Setup our new audio player class and pass it the playlist.
-                var player = new Player([
-                    {
-                        title: 'No Music',
-                        file: '03c2b5fa-d6f8-4b05-970b-8678b6b2fdd7-2-MB-OGG.ogg',
-                        howl: null
-                    },
-                    {
-                        title: '80s Vibe',
-                        file: '80s_vibe',
-                        howl: null
-                    },
-                    {
-                        title: 'Running Out',
-                        file: 'running_out',
-                        howl: null
-                    }
-                ]);
+                // // Setup our new audio player class and pass it the playlist.
+                // var player = new Player([
+                //     {
+                //         title: 'No Music',
+                //         file: '03c2b5fa-d6f8-4b05-970b-8678b6b2fdd7-2-MB-OGG.ogg',
+                //         howl: null
+                //     },
+                //     {
+                //         title: '80s Vibe',
+                //         file: '80s_vibe',
+                //         howl: null
+                //     },
+                //     {
+                //         title: 'Running Out',
+                //         file: 'running_out',
+                //         howl: null
+                //     }
+                // ]);
+
+                //
+                // // Fetch the JSON string from the span element
+                // var playlistText = document.getElementById("playListItems").textContent;
+                //
+                // // Parse the JSON string into a JavaScript object
+                // var playlist = JSON.parse(playlistText);
+                //
+                // // Transform the playlist for Howler.js
+                // var formattedPlaylist = playlist.map(function (item) {
+                //     return {
+                //         title: item.title,
+                //         file: item.file,
+                //         howl: null
+                //     };
+                // });
+
+                console.log('OLD Playlist:', player);
+
+                // Setup our new audio player class and pass it the playlist
+                // var formatedplayer = new Player(formattedPlaylist);
+                //
+                // console.log('FORMATED Playlist:', formatedplayer);
 
                 // Bind our player controls.
                 playBtn.addEventListener('click', function () {
