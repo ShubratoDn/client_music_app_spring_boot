@@ -308,13 +308,13 @@ body {
   box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.33);
 }
 #barEmpty {
-  width: 90%;
+  width: 100%;
   opacity: 0.5;
   box-shadow: none;
   cursor: pointer;
 }
 #barFull {
-  width: 90%;
+  width: 100%;
 }
 #sliderBtn {
   width: 50px;
