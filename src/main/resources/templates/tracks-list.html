@@ -16,6 +16,11 @@
                     <i class="fas fa-music"></i> Tracks
                 </div>
                 <div class="card-body">
+                    <!-- Search Bar -->
+                    <div class="mb-3">
+                        <input type="text" id="searchTrackInput" class="form-control" placeholder="Search for a track..." onkeyup="searchTracks()">
+                    </div>
+
                     <!-- Success Alert -->
                     <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
                         <span th:text="${success}"></span>
@@ -28,7 +33,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
 
-                    <table class="table table-bordered table-striped">
+                    <table class="table table-bordered table-striped" id="tracksTable">
                         <thead>
                         <tr>
                             <th>#</th>
@@ -39,7 +44,7 @@
                             <th>Action</th>
                         </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="tracksBody">
                         <tr th:each="track, iterStat : ${tracks}">
                             <td th:text="${iterStat.index + 1}"></td>
                             <td th:text="${track.name}"></td>
@@ -47,7 +52,7 @@
                             <td th:text="${track.album?.name ?: ''}"></td>
                             <td th:text="${track.album?.artist ?: ''}"></td>
                             <td>
-                                <a th:href="@{/tracks/edit/{id}(id=${track.id})}" class="btn btn-sm btn-primary">Edit</a>
+                                <a sec:authorize="hasRole('ADMIN')" th:href="@{/tracks/edit/{id}(id=${track.id})}" class="btn btn-sm btn-primary">Edit</a>
                                 <a th:href="@{/player/music/{id}(id=${track.id})}" class="btn btn-sm btn-success">Play</a>
                                 <button class="btn btn-sm btn-secondary"
                                         data-bs-toggle="modal"
@@ -56,7 +61,6 @@
                                     Add to Playlist
                                 </button>
                             </td>
-
                         </tr>
                         </tbody>
                     </table>
@@ -179,6 +183,58 @@
                 });
             });
         </script>
+
+
+
+
+        <script>
+            function searchTracks() {
+                const query = $("#searchTrackInput").val(); // Get the search input value
+
+                $.ajax({
+                    url: `/tracks/search`, // Endpoint for searching tracks
+                    type: "GET",
+                    data: { q: query }, // Send the query as a parameter
+                    success: function (data) {
+                        console.log(data); // Log the response for debugging
+                        const tableBody = $("#tracksBody"); // Select the table body
+                        tableBody.empty(); // Clear the existing rows
+
+                        if (data.length > 0) {
+                            // Loop through the returned tracks and create table rows
+                            data.forEach((track, index) => {
+                                const row = `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${track.name}</td>
+                                <td>${track.duration}</td>
+                                <td>${track.album?.name || ""}</td>
+                                <td>${track.album?.artist || ""}</td>
+                                <td>
+                                    <a href="/tracks/edit/${track.id}" class="btn btn-sm btn-primary">Edit</a>
+                                    <a href="/player/music/${track.id}" class="btn btn-sm btn-success">Play</a>
+                                    <button class="btn btn-sm btn-secondary"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#addToPlaylistModal"
+                                            data-track-id="${track.id}">
+                                        Add to Playlist
+                                    </button>
+                                </td>
+                            </tr>`;
+                                tableBody.append(row); // Append each row to the table body
+                            });
+                        } else {
+                            // Show a message if no tracks are found
+                            tableBody.append(`<tr><td colspan="6">No tracks found</td></tr>`);
+                        }
+                    },
+                    error: function (error) {
+                        console.error("Error fetching tracks:", error); // Log any error that occurs
+                    }
+                });
+            }
+        </script>
+
 
 
     </main>

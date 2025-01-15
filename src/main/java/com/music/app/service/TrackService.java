@@ -4,8 +4,10 @@ import com.mpatric.mp3agic.InvalidDataException;
 import com.mpatric.mp3agic.Mp3File;
 import com.mpatric.mp3agic.UnsupportedTagException;
 import com.music.app.entity.Album;
+import com.music.app.entity.Playlist;
 import com.music.app.entity.Track;
 import com.music.app.repository.AlbumRepository;
+import com.music.app.repository.PlaylistRepository;
 import com.music.app.repository.TrackRepository;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
@@ -27,10 +29,12 @@ import java.util.UUID;
 public class TrackService {
     private final TrackRepository trackRepository;
     private final AlbumRepository albumRepository;
+    private final PlaylistRepository playlistRepository;
 
-    public TrackService(TrackRepository trackRepository, AlbumRepository albumRepository) {
+    public TrackService(TrackRepository trackRepository, AlbumRepository albumRepository, PlaylistRepository playlistRepository) {
         this.trackRepository = trackRepository;
         this.albumRepository = albumRepository;
+        this.playlistRepository = playlistRepository;
     }
 
     public void saveTrack(String name, String duration, Long albumId, MultipartFile audioFile) throws IOException {
@@ -110,6 +114,12 @@ public class TrackService {
         return trackRepository.findByAlbum(album);
     }
 
+    public List<Track> getTracksByPlaylist(Long playlistId) {
+        Playlist playlist = new Playlist();
+        playlist.setId(playlistId);
+
+        return trackRepository.findByPlaylists(playlist);
+    }
 
     public void updateTrack(Long id, String name, String duration, Long albumId, MultipartFile audioFile) throws Exception {
         Track track = trackRepository.findById(id).orElseThrow(() -> new Exception("Track not found"));
@@ -135,5 +145,10 @@ public class TrackService {
     }
 
 
+
+    public List<Track> searchTracks(String query) {
+        List<Track> tracks = trackRepository.findByNameContainingIgnoreCase(query);
+        return tracks;
+    }
 
 }

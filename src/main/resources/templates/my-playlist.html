@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="base::layout(~{::title}, ~{::main})">
+<head>
+    <title>Music App</title>
+</head>
+<body>
+
+<main>
+    <div class="container-fluid px-4">
+        <h1 class="mb-4">My Playlists</h1>
+
+        <div th:if="${playlists.size() == 0}" class="alert alert-info">
+            You have no playlists yet. Create one by adding a track to a new playlist!
+        </div>
+
+        <!-- Error Alert -->
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Success Alert -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div class="accordion" id="playlistAccordion">
+            <div th:each="playlist : ${playlists}" class="accordion-item">
+
+
+                <h2 class="accordion-header position-relative" th:id="'heading-' + ${playlist.id}">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                            th:data-bs-target="'#collapse-' + ${playlist.id}" aria-expanded="true"
+                            th:aria-controls="'collapse-' + ${playlist.id}">
+                        <h5 th:text="${playlist.name}"></h5>
+                    </button>
+                    <div class="btn-play-accordion">
+                        <a th:href="@{/player/playlist/{id}(id=${playlist.id})}"
+                           class="btn btn-sm btn-success"
+                           th:if="${!#lists.isEmpty(playlist.tracks)}">
+                            Play All
+                        </a>
+                        <a th:href="@{/playlist/remove-playlist/{id}(id=${playlist.id})}"
+                           class="btn btn-sm btn-danger"
+                        >
+                            Delete
+                        </a>
+                    </div>
+                </h2>
+
+                <div th:attr="id='collapse-' + ${playlist.id}"
+                     th:classappend="' collapse' + ${#lists.isEmpty(playlist.tracks) ? '' : ' show'}"
+                     aria-labelledby="heading-{playlist.id}" data-bs-parent="#playlistAccordion">
+                    <div class="accordion-body">
+                        <div th:if="${#lists.isEmpty(playlist.tracks)}">
+                            <p>No tracks in this playlist.</p>
+                        </div>
+                        <ul th:if="${!#lists.isEmpty(playlist.tracks)}" class="list-group">
+                            <li th:each="track : ${playlist.tracks}"
+                                class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>
+                                    <strong th:text="${track.name}"></strong>
+                                    <br>
+                                    <small th:text="'Duration: ' + ${track.duration}"></small>
+                                </span>
+                                <div>
+                                    <a sec:authorize="hasRole('ADMIN')" th:href="@{/tracks/edit/{id}(id=${track.id})}" class="btn btn-sm btn-primary">Edit</a>
+                                    <a th:href="@{/player/music/{id}(id=${track.id})}" class="btn btn-sm btn-success">Play</a>
+                                    <button class="btn btn-sm btn-danger"
+                                            th:data-track-id="${track.id}"
+                                            th:data-playlist-id="${playlist.id}"
+                                            onclick="removeTrack(this)">Remove
+                                    </button>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript to remove a track (AJAX example)
+        function removeTrack(button) {
+            const trackId = $(button).data('track-id');
+            const playlistId = $(button).data('playlist-id');
+            $.ajax({
+                url: `/api/playlist/remove-track/${trackId}?playlistId=${playlistId}`,
+                type: 'DELETE',
+                success: function (response) {
+                    alert('Track removed successfully');
+                    location.reload(); // Reload to reflect changes
+                },
+                error: function (err) {
+                    console.error(err);
+                    alert('Error removing track');
+                }
+            });
+        }
+    </script>
+
+</main>
+
+</body>
+</html>

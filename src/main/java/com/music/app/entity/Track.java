@@ -1,5 +1,7 @@
 package com.music.app.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +57,7 @@ public class Track {
     }
 
     public Album getAlbum() {
+        if(album != null) album.setTracks(null);
         return album;
     }
 
@@ -62,11 +65,25 @@ public class Track {
         this.album = album;
     }
 
+    @JsonIgnore
     public List<Playlist> getPlaylists() {
         return playlists;
     }
 
+    @JsonProperty
     public void setPlaylists(List<Playlist> playlists) {
         this.playlists = playlists;
+    }
+
+    @Override
+    public String toString() {
+        return "Track{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", duration='" + duration + '\'' +
+                ", audioUrl='" + audioUrl + '\'' +
+                ", album=" + album +
+                ", playlists=" + playlists +
+                '}';
     }
 }

@@ -39,14 +39,20 @@ public class MusicController {
         return "player";
     }
 
+
+
+
+
     @GetMapping("/player/playlist/{id}")
-    public String musicPlayerView(@PathVariable Long id, Model model) {
-        List<Map<String, String>> playlist = List.of(
-                Map.of("title", "No Music", "file", "03c2b5fa-d6f8-4b05-970b-8678b6b2fdd7-2-MB-OGG.ogg"),
-                Map.of("title", "Test 123", "file", "80s_vibe"),
-                Map.of("title", "Test 456", "file", "running_out"),
-                Map.of("title", "Test 789", "file", "running_out")
-        );
+    public String musicPlaylist(@PathVariable Long id, Model model) {
+        List<Track> tracksByPlaylist = trackService.getTracksByPlaylist(id);
+        // Map the tracks to the required playlist format
+        List<Map<String, String>> playlist = tracksByPlaylist.stream()
+                .map(track -> Map.of(
+                        "title", track.getName(),
+                        "file", track.getAudioUrl()
+                ))
+                .toList();
 
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -58,8 +64,6 @@ public class MusicController {
 
         return "player";
     }
-
-
 
     @GetMapping("/player/album/{id}")
     public String musicAlbum(@PathVariable Long id, Model model) {
@@ -81,11 +85,5 @@ public class MusicController {
         }
 
         return "player";
-    }
-
-
-    @GetMapping("/test")
-    public String test(){
-        return "test";
     }
 }

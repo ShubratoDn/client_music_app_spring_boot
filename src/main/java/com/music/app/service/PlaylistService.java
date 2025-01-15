@@ -4,6 +4,8 @@ import com.music.app.entity.Playlist;
 import com.music.app.entity.Track;
 import com.music.app.entity.User;
 import com.music.app.repository.PlaylistRepository;
+import com.music.app.repository.TrackRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +15,9 @@ import java.util.List;
 public class PlaylistService {
     @Autowired
     private PlaylistRepository playlistRepository;
+
+    @Autowired
+    private TrackRepository trackRepository;
 
     public Playlist getPlaylistById(Long id){
         return playlistRepository.findById(id).orElse(null);
@@ -47,5 +52,28 @@ public class PlaylistService {
 
     public List<Playlist> getPlaylistsByUser(User user) {
         return playlistRepository.findByUser(user);
+    }
+
+
+    public void removeTrackFromPlaylist(Long playlistId, Long trackId) {
+        Playlist playlist = playlistRepository.findById(playlistId)
+                .orElseThrow(() -> new EntityNotFoundException("Playlist not found"));
+
+        Track track = trackRepository.findById(trackId)
+                .orElseThrow(() -> new EntityNotFoundException("Track not found"));
+
+        if (playlist.getTracks().contains(track)) {
+            playlist.getTracks().remove(track);
+            playlistRepository.save(playlist);
+        } else {
+            throw new IllegalArgumentException("Track is not in the playlist");
+        }
+    }
+
+
+    public void removePlaylist(Long playlistId) {
+        Playlist playlist = playlistRepository.findById(playlistId)
+                .orElseThrow(() -> new EntityNotFoundException("Playlist not found"));
+        playlistRepository.delete(playlist);
     }
 }

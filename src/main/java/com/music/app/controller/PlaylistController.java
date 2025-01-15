@@ -9,11 +9,11 @@ import com.music.app.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -73,4 +73,42 @@ public class PlaylistController {
         return ResponseEntity.ok(playlists);
     }
 
+
+    @GetMapping("/my-playlist")
+    public String showUserPlaylists(Model model ) {
+        // Get the logged-in user
+        User user = userService.getLoggedInUser();
+
+        // Fetch playlists for the user
+        List<Playlist> playlists = playlistService.getPlaylistsByUser(user);
+
+        // Add playlists to the model
+        model.addAttribute("playlists", playlists);
+
+        return "my-playlist";
+    }
+
+
+    @DeleteMapping("/api/playlist/remove-track/{trackId}")
+    public ResponseEntity<String> removeTrackFromPlaylist(@PathVariable Long trackId, @RequestParam Long playlistId) {
+        try {
+            playlistService.removeTrackFromPlaylist(playlistId, trackId);
+            return ResponseEntity.ok("Track removed successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error removing track: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/playlist/remove-playlist/{playlistId}")
+    public String removePlaylist(@PathVariable Long playlistId, RedirectAttributes redirectAttributes) {
+        try {
+            playlistService.removePlaylist(playlistId);
+            redirectAttributes.addFlashAttribute("success", "Playlist removed successfully");
+            return "redirect:/my-playlist";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error removing playlist: " + e.getMessage());
+            return "redirect:/my-playlist";
+        }
+    }
 }

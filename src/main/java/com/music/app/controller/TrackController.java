@@ -4,6 +4,7 @@ import com.music.app.entity.Track;
 import com.music.app.service.AlbumService;
 import com.music.app.service.TrackService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -160,5 +161,24 @@ public class TrackController {
         return "redirect:/tracks";
     }
 
+
+
+    @GetMapping("/search")
+    @ResponseBody
+    public ResponseEntity<List<Track>> searchTracks(@RequestParam String q) {
+        System.out.println("Searching for '" + q+"'");
+        List<Track> tracks;
+        if(q == null || q.isBlank()){
+            tracks = trackService.getAllTracks();
+        }else{
+            tracks = trackService.searchTracks(q);
+        }
+        System.out.println(" And size is "+ tracks.size());
+        for (Track track : tracks){
+            System.out.println(track);
+        }
+        System.out.println("====================");
+        return ResponseEntity.ok(tracks);
+    }
 
 }
