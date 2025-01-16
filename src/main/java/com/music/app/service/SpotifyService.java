@@ -1,5 +1,6 @@
 package com.music.app.service;
 
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -20,6 +21,13 @@ public class SpotifyService {
     @Autowired
     private RestTemplate restTemplate;
 
+
+    private final HttpSession session;
+
+    public SpotifyService(HttpSession session) {
+        this.session = session;
+    }
+
     private String accessToken;
     private Map<String, String> spotifyUserInfo = new HashMap<>();
 
@@ -28,11 +36,15 @@ public class SpotifyService {
     }
 
     public boolean isConnected() {
-        return accessToken != null && !accessToken.isEmpty();
+        return session.getAttribute("spotifyAccessToken") != null;
     }
 
     public Map<String, String> getUserInfo() {
-        return spotifyUserInfo;
+        Object userInfo = session.getAttribute("spotifyUserInfo");
+        if (userInfo instanceof Map) {
+            return (Map<String, String>) userInfo;
+        }
+        return new HashMap<>();
     }
 
     public void fetchAndStoreUserInfo() {
@@ -54,12 +66,14 @@ public class SpotifyService {
             LinkedHashMap result = (LinkedHashMap) response.getBody();
             spotifyUserInfo.put("displayName", (String) result.get("display_name"));
             spotifyUserInfo.put("email", (String) result.get("email"));
+            // Store user info in session
+            session.setAttribute("spotifyUserInfo", spotifyUserInfo);
         }
     }
 
     public void clearSpotifySession() {
-        accessToken = null;
-        spotifyUserInfo.clear();
+        session.removeAttribute("spotifyAccessToken");
+        session.removeAttribute("spotifyUserInfo");
     }
 
 
@@ -100,6 +114,7 @@ public class SpotifyService {
 
         ResponseEntity<Map> response = restTemplate.postForEntity(spotifyTokenUrl, request, Map.class);
         if (response.getStatusCode() == HttpStatus.OK) {
+            session.setAttribute("spotifyAccessToken", response.getBody().get("access_token").toString());
             return response.getBody().get("access_token").toString();
         }
         return null;
