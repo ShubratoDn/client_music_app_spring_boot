@@ -1,31 +1,107 @@
-//package com.music.app.service;
+package com.music.app.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+@Service
+public class SpotifyService {
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    private String accessToken;
+    private Map<String, String> spotifyUserInfo = new HashMap<>();
+
+    public void setAccessToken(String token) {
+        this.accessToken = token;
+    }
+
+    public boolean isConnected() {
+        return accessToken != null && !accessToken.isEmpty();
+    }
+
+    public Map<String, String> getUserInfo() {
+        return spotifyUserInfo;
+    }
+
+    public void fetchAndStoreUserInfo() {
+        if (accessToken != null) {
+//            RestTemplate restTemplate = new RestTemplate();
+//            String url = "https://api.spotify.com/v1/me";
 //
-//import org.apache.hc.core5.http.ParseException;
-//import org.springframework.beans.factory.annotation.Value;
-//import org.springframework.stereotype.Service;
-//import se.michaelthelin.spotify.SpotifyApi;
-//import se.michaelthelin.spotify.exceptions.SpotifyWebApiException;
-//import se.michaelthelin.spotify.model_objects.specification.PlaylistSimplified;
+//            Map<String, String> headers = new HashMap<>();
+//            headers.put("Authorization", "Bearer " + accessToken);
 //
-//import java.io.IOException;
-//import java.net.URI;
-//import java.util.List;
+//            Map response = restTemplate.getForObject(url, Map.class, headers);
 //
-//@Service
-//public class SpotifyService {
-//    private final SpotifyApi spotifyApi;
-//
-//    public SpotifyService(@Value("${spotify.client.id}") String clientId,
-//                          @Value("${spotify.redirect.uri}") String redirectUri) {
-//        spotifyApi = new SpotifyApi.Builder()
-//                .setClientId(clientId)
-//
-//                .setRedirectUri(URI.create(redirectUri))
-//                .build();
-//    }
-//
-//    public List<PlaylistSimplified> getUserPlaylists(String accessToken) throws SpotifyWebApiException, IOException, IOException, ParseException, SpotifyWebApiException {
-//        spotifyApi.setAccessToken(accessToken);
-//        return List.of(spotifyApi.getListOfCurrentUsersPlaylists().build().execute().getItems());
-//    }
-//}
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", "Bearer " + accessToken);
+
+            HttpEntity<String> entity = new HttpEntity<>("paramters", headers);
+
+            ResponseEntity<Object> response = restTemplate.exchange("https://api.spotify.com/v1/me", HttpMethod.GET, entity, Object.class);
+            LinkedHashMap result = (LinkedHashMap) response.getBody();
+            spotifyUserInfo.put("displayName", (String) result.get("display_name"));
+            spotifyUserInfo.put("email", (String) result.get("email"));
+        }
+    }
+
+    public void clearSpotifySession() {
+        accessToken = null;
+        spotifyUserInfo.clear();
+    }
+
+
+    @Value("${spotify.client-id}")
+    private String clientId;
+
+    @Value("${spotify.client-secret}")
+    private String clientSecret;
+
+
+    @Value("${spotify.redirect-uri}")
+    private String redirectUri;
+
+    private final String spotifyAuthUrl = "https://accounts.spotify.com/authorize";
+    private final String spotifyTokenUrl = "https://accounts.spotify.com/api/token";
+
+    public String getAuthorizationUrl() {
+        return "https://accounts.spotify.com/en/authorize?client_id=" + clientId
+                + "&response_type=code&redirect_uri=" + redirectUri
+                + "&scope=ugc-image-upload,user-read-playback-state,user-modify-playback-state,user-read-currently-playing,streaming,app-remote-control,user-read-email,user-read-private"
+                + ",playlist-read-collaborative,playlist-modify-public,playlist-read-private,playlist-modify-private,user-library-modify,user-library-read,user-top-read,user-read-playback-position,user-read-recently-played,user-follow-read,user-follow-modify";
+    }
+
+    public String exchangeCodeForToken(String code) {
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        String credentials = clientId + ":" + clientSecret;
+        headers.setBasicAuth(Base64.getEncoder().encodeToString(credentials.getBytes()));
+
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("grant_type", "authorization_code");
+        body.add("code", code);
+        body.add("redirect_uri", redirectUri);
+
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
+
+        ResponseEntity<Map> response = restTemplate.postForEntity(spotifyTokenUrl, request, Map.class);
+        if (response.getStatusCode() == HttpStatus.OK) {
+            return response.getBody().get("access_token").toString();
+        }
+        return null;
+    }
+}

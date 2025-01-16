@@ -91,6 +91,28 @@
                                     My Playlist
                                 </a>
                             </div>
+
+                            <!-- Add Spotify Section -->
+                            <div class="sb-sidenav-menu-heading">Spotify</div>
+
+                            <div th:if="${spotifyService.isConnected()}">
+                                <p class="nav-link flex-column align-items-baseline">
+                                    <span>Connected as: </span>
+                                    <span th:text="${spotifyService.getUserInfo().get('displayName')}"></span>
+                                </p>
+                                <a class="nav-link" href="/spotify/disconnect">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-sign-out-alt"></i></div>
+                                    Disconnect Spotify
+                                </a>
+                            </div>
+
+                            <div th:if="${!spotifyService.isConnected()}">
+                                <a class="nav-link" href="/spotify/connect">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-plug"></i></div>
+                                    Connect Spotify
+                                </a>
+                            </div>
+
                         </div>
                     </div>
 
