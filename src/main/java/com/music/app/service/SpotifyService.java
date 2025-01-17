@@ -10,10 +10,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class SpotifyService {
@@ -30,6 +27,8 @@ public class SpotifyService {
 
     private String accessToken;
     private Map<String, String> spotifyUserInfo = new HashMap<>();
+
+    private String spotifyApiBaseUrl = "https://api.spotify.com";
 
     public void setAccessToken(String token) {
         this.accessToken = token;
@@ -119,4 +118,169 @@ public class SpotifyService {
         }
         return null;
     }
+
+
+
+    public List<Map<String, String>> getRecentlyPlayedTracks() {
+        String accessToken = (String) session.getAttribute("spotifyAccessToken");
+
+        if (accessToken == null) {
+            return new ArrayList<>();
+        }
+
+        String url = spotifyApiBaseUrl + "/v1/me/player/recently-played";
+
+        try {
+            // Create headers
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(accessToken);
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            // Create the request
+            HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+
+            // Send GET request
+            ResponseEntity<Map> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    requestEntity,
+                    Map.class
+            );
+
+            // Parse the response
+            if (response.getStatusCode() == HttpStatus.OK) {
+                List<Map<String, Object>> items = (List<Map<String, Object>>) response.getBody().get("items");
+                List<Map<String, String>> tracks = new ArrayList<>();
+
+                for (Map<String, Object> item : items) {
+                    Map<String, Object> track = (Map<String, Object>) item.get("track");
+                    Map<String, Object> album = (Map<String, Object>) track.get("album");
+                    List<Map<String, Object>> artists = (List<Map<String, Object>>) track.get("artists");
+
+                    String artistNames = String.join(", ",
+                            artists.stream().map(artist -> artist.get("name").toString()).toList());
+
+                    tracks.add(Map.of(
+                            "trackName", track.get("name").toString(),
+                            "artistName", artistNames,
+                            "albumName", album.get("name").toString(),
+                            "coverImage", ((List<Map<String, Object>>) album.get("images")).get(0).get("url").toString(),
+                            "previewUrl", track.get("preview_url") != null ? track.get("preview_url").toString() : "",
+                            "spotifyUrl", ((Map<String, String>) track.get("external_urls")).get("spotify")
+                    ));
+                }
+
+                return tracks;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return new ArrayList<>();
+    }
+
+
+
+
+    public List<Map<String, Object>> getUserPlaylists() {
+        String accessToken = (String) session.getAttribute("spotifyAccessToken");
+
+        if (accessToken == null) {
+            return new ArrayList<>();
+        }
+
+        String url = spotifyApiBaseUrl + "/v1/me/playlists";
+
+        try {
+            // Set headers
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(accessToken);
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            // Create request
+            HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+
+            // Send GET request
+            ResponseEntity<Map> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    requestEntity,
+                    Map.class
+            );
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                List<Map<String, Object>> playlists = (List<Map<String, Object>>) response.getBody().get("items");
+                List<Map<String, Object>> playlistData = new ArrayList<>();
+
+                for (Map<String, Object> playlist : playlists) {
+                    String playlistId = (String) playlist.get("id");
+
+                    // Fetch playlist tracks
+                    List<Map<String, Object>> tracks = getPlaylistTracks(playlistId);
+
+                    playlistData.add(Map.of(
+                            "id", playlistId,
+                            "name", playlist.get("name"),
+                            "tracks", tracks
+                    ));
+                }
+
+                return playlistData;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return new ArrayList<>();
+    }
+
+    private List<Map<String, Object>> getPlaylistTracks(String playlistId) {
+        String accessToken = (String) session.getAttribute("spotifyAccessToken");
+
+        if (accessToken == null) {
+            return new ArrayList<>();
+        }
+
+        String url = spotifyApiBaseUrl + "/v1/playlists/" + playlistId + "/tracks";
+
+        try {
+            // Set headers
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(accessToken);
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            // Create request
+            HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+
+            // Send GET request
+            ResponseEntity<Map> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    requestEntity,
+                    Map.class
+            );
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                List<Map<String, Object>> items = (List<Map<String, Object>>) response.getBody().get("items");
+                List<Map<String, Object>> tracks = new ArrayList<>();
+
+                for (Map<String, Object> item : items) {
+                    Map<String, Object> track = (Map<String, Object>) item.get("track");
+                    tracks.add(Map.of(
+                            "id", track.get("id"),
+                            "name", track.get("name"),
+                            "duration", track.get("duration_ms"),
+                            "spotifyUrl", ((Map<String, String>) track.get("external_urls")).get("spotify")
+                    ));
+                }
+
+                return tracks;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return new ArrayList<>();
+    }
+
 }

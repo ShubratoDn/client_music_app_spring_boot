@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="base::layout(~{::title}, ~{::main})">
+<head>
+    <title>Music App</title>
+</head>
+<body>
+
+<main>
+    <div class="container-fluid px-4">
+        <h1 class="mb-4">My Playlists</h1>
+
+        <!-- Alert if no playlists -->
+        <div th:if="${playlists.size() == 0}" class="alert alert-info">
+            No playlists found. Start by creating a playlist in Spotify!
+        </div>
+
+        <div class="accordion" id="playlistAccordion">
+            <div th:each="playlist : ${playlists}" class="accordion-item">
+                <h2 class="accordion-header" th:attr="id='heading-' + ${playlist.id}">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                            th:data-bs-target="'#collapse-' + ${playlist.id}" aria-expanded="true"
+                            th:aria-controls="'collapse-' + ${playlist.id}">
+                        <span th:text="${playlist.name}"></span>
+                    </button>
+                </h2>
+
+                <div th:attr="id='collapse-' + ${playlist.id}"
+                     th:classappend="' collapse' + (${#lists.isEmpty(playlist.tracks) ? '' : ' show'})"
+                     aria-labelledby="heading-{playlist.id}" data-bs-parent="#playlistAccordion">
+                    <div class="accordion-body">
+                        <div th:if="${#lists.isEmpty(playlist.tracks)}">
+                            <p>No tracks found in this playlist.</p>
+                        </div>
+                        <ul th:if="${!#lists.isEmpty(playlist.tracks)}" class="list-group">
+                            <li th:each="track : ${playlist.tracks}" class="list-group-item d-flex justify-content-between">
+                            <span>
+                                <strong th:text="${track.name}"></strong>
+                                <br>
+                                <small th:text="'Duration: ' + ${#numbers.formatDecimal(track.duration / 60000.0, 0, 2)} + ' min'"></small>
+                            </span>
+                                <a th:href="${track.spotifyUrl}" target="_blank" class="btn btn-sm btn-success">Open in Spotify</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</main>
+
+</body>
+</html>

@@ -100,6 +100,14 @@
                                     <span>Connected as: </span>
                                     <span th:text="${spotifyService.getUserInfo().get('displayName')}"></span>
                                 </p>
+                                <a class="nav-link" href="/spotify/recently-played">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-history"></i></div>
+                                    Recently Played
+                                </a>
+                                <a class="nav-link" href="/spotify/playlists">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-list"></i></div>
+                                    My Playlists
+                                </a>
                                 <a class="nav-link" href="/spotify/disconnect">
                                     <div class="sb-nav-link-icon"><i class="fas fa-sign-out-alt"></i></div>
                                     Disconnect Spotify

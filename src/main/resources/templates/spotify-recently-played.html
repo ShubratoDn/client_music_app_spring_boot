@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="base::layout(~{::title}, ~{::main})">
+<head>
+    <title>Music App</title>
+</head>
+<body>
+
+<main>
+    <div class="container mt-5">
+        <h1>Recently Played Tracks</h1>
+        <div th:if="${recentlyPlayedTracks.isEmpty()}">
+            <p>No recently played tracks found. Please connect Spotify to view your history.</p>
+        </div>
+        <div class="row">
+            <div class="col-sm-6 col-md-4 mb-3" th:each="track : ${recentlyPlayedTracks}">
+                <div class="card">
+                    <img class="card-img-top" th:src="${track.get('coverImage')}" alt="Album Cover">
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${track.get('trackName')}"></h5>
+                        <p class="card-text">
+                            <strong>Artist:</strong> <span th:text="${track.get('artistName')}"></span><br>
+                            <strong>Album:</strong> <span th:text="${track.get('albumName')}"></span>
+                        </p>
+                        <a th:href="${track.spotifyUrl}" target="_blank">Listen on Spotify</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+
+</body>
+</html>
