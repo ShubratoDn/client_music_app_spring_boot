@@ -16,12 +16,19 @@
 
         <div class="accordion" id="playlistAccordion">
             <div th:each="playlist : ${playlists}" class="accordion-item">
-                <h2 class="accordion-header" th:attr="id='heading-' + ${playlist.id}">
+                <h2 class="accordion-header position-relative" th:attr="id='heading-' + ${playlist.id}">
                     <button class="accordion-button" type="button" data-bs-toggle="collapse"
                             th:data-bs-target="'#collapse-' + ${playlist.id}" aria-expanded="true"
                             th:aria-controls="'collapse-' + ${playlist.id}">
                         <span th:text="${playlist.name}"></span>
                     </button>
+                    <div class="btn-play-accordion">
+    <!--                        <a th:href="@{${playlist.url}}"-->
+    <!--                           class="btn btn-sm btn-success"-->
+    <!--                           th:if="${!#lists.isEmpty(playlist.tracks)}">-->
+    <!--                            Play All-->
+    <!--                        </a>-->
+                    </div>
                 </h2>
 
                 <div th:attr="id='collapse-' + ${playlist.id}"

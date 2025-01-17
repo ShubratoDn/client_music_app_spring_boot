@@ -37,6 +37,13 @@ public class AuthController {
 
         return "login"; // Thymeleaf login page name
     }
+
+    @GetMapping("/logout")
+    public String logout(HttpServletRequest request, HttpSession session) {
+        session.invalidate();
+        return "redirect:/login";
+    }
+
     @GetMapping("/register")
     public String showRegistrationForm(Model model) {
         if (!model.containsAttribute("formData")) {
