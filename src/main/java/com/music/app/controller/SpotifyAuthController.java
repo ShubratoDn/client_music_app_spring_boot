@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -55,6 +56,25 @@ public class SpotifyAuthController {
         model.addAttribute("playlists", playlists);
         return "spotify-playlists";
     }
+
+
+
+    @GetMapping("/search")
+    public String searchSpotify(
+            @RequestParam (name = "query",required = false) String query,
+            @RequestParam(defaultValue = "track") String type,
+            Model model) {
+        List<Map<String, Object>> results = new ArrayList<>();
+        if(query != null && !query.isEmpty()){
+            System.out.println("Calling");
+            results = spotifyService.searchSpotify(query, type);
+        }
+        model.addAttribute("results", results);
+        model.addAttribute("query", query);
+        model.addAttribute("type", type);
+        return "spotify-search";
+    }
+
 
 
 }

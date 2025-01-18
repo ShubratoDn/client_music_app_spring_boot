@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Service
@@ -282,5 +284,89 @@ public class SpotifyService {
 
         return new ArrayList<>();
     }
+
+
+
+
+    public List<Map<String, Object>> searchSpotify(String query, String type) {
+        String accessToken = (String) session.getAttribute("spotifyAccessToken");
+
+        if (accessToken == null) {
+            return new ArrayList<>();
+        }
+
+        String url = spotifyApiBaseUrl + "/v1/search?q=" + UriUtils.encode(query, StandardCharsets.UTF_8) + "&type=" + type;
+
+        try {
+            // Set headers
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(accessToken);
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            // Create request
+            HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+
+            // Send GET request
+            ResponseEntity<Map> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    requestEntity,
+                    Map.class
+            );
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                System.out.println("Result: \n\n" + response + "\n");
+                Map<String, Object> searchResults = response.getBody();
+                List<Map<String, Object>> results = new ArrayList<>();
+
+                if ("track".equals(type)) {
+                    List<Map<String, Object>> tracks = (List<Map<String, Object>>) ((Map<String, Object>) searchResults.get("tracks")).get("items");
+                    for (Map<String, Object> track : tracks) {
+                        results.add(Map.of(
+                                "name", track.get("name"),
+                                "artist", ((List<Map<String, Object>>) track.get("artists")).get(0).get("name"),
+                                "album", ((Map<String, Object>) track.get("album")).get("name"),
+                                "url", ((Map<String, Object>) track.get("external_urls")).get("spotify"),
+                                "image", ((List<Map<String, Object>>) ((Map<String, Object>) track.get("album")).get("images")).get(0).get("url")
+                        ));
+                    }
+                } else if ("artist".equals(type)) {
+                    List<Map<String, Object>> artists = (List<Map<String, Object>>) ((Map<String, Object>) searchResults.get("artists")).get("items");
+                    for (Map<String, Object> artist : artists) {
+                        results.add(Map.of(
+                                "name", artist.get("name"),
+                                "url", ((Map<String, Object>) artist.get("external_urls")).get("spotify"),
+                                "album","",
+                                "artist", "",
+                                "image", !((List<Map<String, Object>>) artist.get("images")).isEmpty()
+                                        ? ((List<Map<String, Object>>) artist.get("images")).get(0).get("url")
+                                        : null
+                        ));
+                    }
+                } else if ("album".equals(type)) {
+                    List<Map<String, Object>> albums = (List<Map<String, Object>>) ((Map<String, Object>) searchResults.get("albums")).get("items");
+                    for (Map<String, Object> album : albums) {
+                        results.add(Map.of(
+                                "name", album.get("name"),
+                                "album", "",
+                                "artist", ((List<Map<String, Object>>) album.get("artists")).get(0).get("name"),
+                                "url", ((Map<String, Object>) album.get("external_urls")).get("spotify"),
+                                "image", !((List<Map<String, Object>>) album.get("images")).isEmpty()
+                                        ? ((List<Map<String, Object>>) album.get("images")).get(0).get("url")
+                                        : null
+                        ));
+                    }
+                }
+
+                return results;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return new ArrayList<>();
+    }
+
+
 
 }

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="base::layout(~{::title}, ~{::main})">
+<head>
+    <title>Music App</title>
+</head>
+<body>
+
+<main>
+    <div class="container mt-4">
+        <h1>Spotify Search</h1>
+
+        <!-- Search Form -->
+        <form action="/spotify/search" method="get" class="mb-4">
+            <div class="input-group">
+                <input type="text" name="query" class="form-control" placeholder="Search for tracks, albums, or artists" th:value="${query}" required>
+                <select name="type" class="form-select">
+                    <option value="track" th:selected="${type == 'track'}">Tracks</option>
+                    <option value="album" th:selected="${type == 'album'}">Albums</option>
+                    <option value="artist" th:selected="${type == 'artist'}">Artists</option>
+                </select>
+                <button class="btn btn-primary" type="submit">Search</button>
+            </div>
+        </form>
+
+        <!-- Search Results -->
+        <div th:if="${#lists.isEmpty(results)}" class="alert alert-info">
+            No results found. Try another search!
+        </div>
+        <div th:if="${!#lists.isEmpty(results)}">
+            <h2>Results:</h2>
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                <div class="col" th:each="result : ${results}">
+                    <div class="card h-100">
+                        <img th:src="${result.image}" class="card-img-top" alt="No Image Available">
+                        <div class="card-body">
+                            <h5 class="card-title" th:text="${result.name}"></h5>
+
+                            <!-- Show artist only if it is available -->
+                            <p class="card-text" th:if="${result.artist != null && !result.artist.isEmpty()}">
+                                Artist: <span th:text="${result.artist}"></span>
+                            </p>
+
+                            <!-- Show album only if it is available -->
+                            <p class="card-text" th:if="${result.album != null && !result.album.isEmpty()}">
+                                Album: <span th:text="${result.album}"></span>
+                            </p>
+
+                            <a th:href="${result.url}" class="btn btn-success btn-sm" target="_blank">Open in Spotify</a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+
+</body>
+</html>
