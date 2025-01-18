@@ -9,12 +9,19 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.UUID;
 
 @Service
 public class UserService {
 
-    @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
     private UserRepo userRepo;
@@ -22,8 +29,16 @@ public class UserService {
     public User findByUsernameOrEmail(String username, String email) {
         return userRepo.findByUsernameOrEmail(username, email);
     }
+
+    public User findByUsername(String username){
+        return userRepo.findByUsername(username);
+    }
+
+    public User findByEmail(String email){
+        return userRepo.findByEmail(email);
+    }
+
     public User saveUser(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
         User save = userRepo.save(user);
         return save;
     }
@@ -39,4 +54,20 @@ public class UserService {
         }
     }
 
+    public String saveProfilePicture(MultipartFile profilePicture) throws IOException {
+        String uploadDir = "src/main/resources/static/uploads/userImages/";
+        String fileName = UUID.randomUUID() + "-" + profilePicture.getOriginalFilename();
+        Path uploadPath = Paths.get(uploadDir);
+
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+
+        try (InputStream inputStream = profilePicture.getInputStream()) {
+            Path filePath = uploadPath.resolve(fileName);
+            Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
+        }
+
+        return "/uploads/userImages/" + fileName;
+    }
 }

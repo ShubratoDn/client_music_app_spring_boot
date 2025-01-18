@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="base::layout(~{::title}, ~{::main})">
+    <head>
+        <title>Music App</title>
+    </head>
+    <body>
+
+        <main>
+            <div class="container mt-5">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h3>User Profile</h3>
+                    </div>
+                    <div class="card-body">
+                        <!-- Success Alert -->
+                        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                            <span th:text="${success}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+
+                        <!-- Error Alert -->
+                        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <span th:text="${error}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        <div class="row">
+                            <!-- Profile Picture -->
+                            <div class="col-md-4 text-center">
+                                <img th:src="${user.profilePictureUrl ?: '/images/default-profile.png'}"
+                                     alt="Profile Picture"
+                                     class="rounded-circle img-thumbnail"
+                                     style="width: 150px; height: 150px; object-fit: cover">
+                            </div>
+
+                            <!-- User Information -->
+                            <div class="col-md-8">
+                                <h4 th:text="${user.displayName}"></h4>
+                                <p><strong>Username:</strong> <span th:text="${user.username}"></span></p>
+                                <p><strong>Email:</strong> <span th:text="${user.email}"></span></p>
+                                <p><strong>Role:</strong> <span th:text="${user.role}"></span></p>
+                                <p>
+                                    <strong>Playlists:</strong>
+                                    <span th:text="${user.playlists != null ? user.playlists.size() : 0}"></span>
+                                </p>
+
+                            </div>
+                        </div>
+
+                        <!-- Edit Profile Button -->
+                        <div class="text-end mt-4">
+                            <a class="btn btn-success" th:href="@{/edit-profile}">
+                                <i class="fas fa-edit"></i> Edit Profile
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+    </body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="base::layout(~{::title}, ~{::main})">
+    <head>
+        <title>Music App</title>
+    </head>
+    <body>
+
+    <main>
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-7">
+                    <div class="card shadow-lg border-0 rounded-lg mt-5">
+                        <div class="card-header">
+                            <h3 class="text-center font-weight-light my-4">Edit Profile</h3>
+                        </div>
+                        <div class="card-body">
+                            <form th:action="@{/edit-profile}" method="post" enctype="multipart/form-data">
+                                <!-- Display error message -->
+                                <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+                                <!-- Username (Read-Only) -->
+                                <div class="form-floating mb-3">
+                                    <input class="form-control" id="username" name="username" type="text"
+                                           th:value="${user.username}" />
+                                    <label for="username">Username</label>
+                                </div>
+
+                                <!-- Email -->
+                                <div class="form-floating mb-3">
+                                    <input class="form-control" id="email" name="email" type="email"
+                                           th:value="${user.email}" />
+                                    <label for="email">Email</label>
+                                </div>
+
+                                <!-- Display Name -->
+                                <div class="form-floating mb-3">
+                                    <input class="form-control" id="displayName" name="displayName" type="text"
+                                           th:value="${user.displayName}" />
+                                    <label for="displayName">Display Name</label>
+                                </div>
+
+                                <!-- Role -->
+                                <div class="form-floating mb-3">
+                                    <select class="form-select" id="role" name="role">
+                                        <option value="USER" th:selected="${user.role == 'USER'}">User</option>
+                                        <option value="ADMIN" th:selected="${user.role == 'ADMIN'}">Admin</option>
+                                    </select>
+                                    <label for="role">Role</label>
+                                </div>
+
+                                <!-- Password and Confirm Password -->
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <div class="form-floating mb-3 mb-md-0">
+                                            <input class="form-control" id="password" name="password" type="password" />
+                                            <label for="password">New Password</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <input class="form-control" id="confirmPassword" name="confirmPassword" type="password" />
+                                            <label for="confirmPassword">Confirm New Password</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Profile Picture -->
+                                <div class="mb-3">
+                                    <label for="profilePicture" class="form-label">Update Profile Picture</label>
+                                    <input class="form-control" id="profilePicture" name="profilePicture" type="file" accept="image/*" />
+                                </div>
+
+                                <!-- Submit Button -->
+                                <div class="mt-4 mb-0">
+                                    <div class="d-grid">
+                                        <button class="btn btn-primary btn-block" type="submit">Save Changes</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    </body>
+</html>

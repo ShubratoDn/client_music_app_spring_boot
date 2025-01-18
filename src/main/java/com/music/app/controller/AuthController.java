@@ -1,10 +1,12 @@
 package com.music.app.controller;
 
 import com.music.app.entity.User;
+import com.music.app.service.PlaylistService;
 import com.music.app.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +23,13 @@ public class AuthController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private PlaylistService playlistService;
+
+
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
     @GetMapping("/login")
     public String login(HttpServletRequest request, Model model) {
@@ -133,9 +142,128 @@ public class AuthController {
         user.setDisplayName(displayName);
         user.setRole(User.Role.valueOf(role.toUpperCase()));
 
+        // If validation passes, proceed with saving the album
+        if(profilePicture != null){
+            try {
+                String userImageUrl = userService.saveProfilePicture(profilePicture);
+                user.setProfilePictureUrl(userImageUrl);
+            } catch (Exception e) {
+                redirectAttributes.addFlashAttribute("error", "Failed to upload profile picture: " + e.getMessage());
+                return "redirect:/login";
+            }
+        }
+
+
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         userService.saveUser(user);
 
         redirectAttributes.addFlashAttribute("success", "Account created successfully! Please login.");
         return "redirect:/login";
     }
+
+    @GetMapping("/profile")
+    public String viewProfile(Model model) {
+        User user = userService.getLoggedInUser();
+        user.setPlaylists(playlistService.getPlaylistsByUser(user));
+        model.addAttribute("user", user);
+        return "profile";
+    }
+
+
+    @GetMapping("/edit-profile")
+    public String showEditProfile(Model model) {
+        model.addAttribute("user", userService.getLoggedInUser());
+        return "edit-profile";
+    }
+
+    @PostMapping("/edit-profile")
+    public String updateProfile(
+            @RequestParam("username") String username,
+            @RequestParam("email") String email,
+            @RequestParam("displayName") String displayName,
+            @RequestParam("role") String role,
+            @RequestParam(value = "password", required = false) String password,
+            @RequestParam(value = "confirmPassword", required = false) String confirmPassword,
+            @RequestParam(value = "profilePicture", required = false) MultipartFile profilePicture,
+            Model model, RedirectAttributes redirectAttributes) {
+
+        Map<String, String> formData = new HashMap<>();
+        formData.put("username", username);
+        formData.put("email", email);
+        formData.put("displayName", displayName);
+        formData.put("role", role);
+
+        // Add formData back to the model to retain user inputs
+        model.addAttribute("user", formData);
+
+
+        User user = userService.getLoggedInUser();
+
+        User dbUsername = userService.findByUsername(username);
+        User dbEmail = userService.findByEmail(email);
+
+        if ( dbUsername != null && !user.getUsername().equalsIgnoreCase(dbUsername.getUsername())) {
+            model.addAttribute("error", "Username already used, try another username");
+            return "edit-profile";
+        }
+
+        if(dbEmail != null && !user.getEmail().equalsIgnoreCase(dbEmail.getEmail())){
+            model.addAttribute("error", "Email already used, try another email");
+            return "edit-profile";
+        }
+
+
+        // Update user details
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setDisplayName(displayName);
+        user.setRole(User.Role.valueOf(role.toUpperCase()));
+
+        // Validate and update password
+        if (password != null && !password.isEmpty()) {
+            if (!password.equals(confirmPassword)) {
+                model.addAttribute("error", "Passwords do not match.");
+                model.addAttribute("user", user);
+                return "edit-profile";
+            }
+        }
+
+        // Validate and update profile picture
+        if (profilePicture != null && !profilePicture.isEmpty()) {
+            String contentType = profilePicture.getContentType();
+            long fileSize = profilePicture.getSize();
+
+            if (contentType == null || !contentType.startsWith("image/")) {
+                model.addAttribute("error", "Uploaded file must be an image.");
+                model.addAttribute("user", user);
+                return "edit-profile";
+            }
+
+            if (fileSize < 10 * 1024 || fileSize > 15 * 1024 * 1024) {
+                model.addAttribute("error", "Image size must be between 10 KB and 15 MB.");
+                model.addAttribute("user", user);
+                return "edit-profile";
+            }
+
+            try {
+                String profilePictureUrl = userService.saveProfilePicture(profilePicture);
+                user.setProfilePictureUrl(profilePictureUrl);
+            } catch (Exception e) {
+                model.addAttribute("error", "Failed to upload profile picture: " + e.getMessage());
+                model.addAttribute("user", user);
+                return "edit-profile";
+            }
+        }
+
+
+        if(password != null && !password.isEmpty() ){
+            user.setPassword(passwordEncoder.encode(password));
+        }
+
+        // Save updated user details
+        userService.saveUser(user);
+        redirectAttributes.addFlashAttribute("success", "Profile updated successfully!");
+        return "redirect:/profile";
+    }
+
 }
