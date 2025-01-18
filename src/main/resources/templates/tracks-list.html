@@ -108,6 +108,10 @@
             </div>
         </div>
 
+        <h1 id="USER_ROLE" class="d-none">
+            <span sec:authorize="hasRole('ADMIN')" > ADMIN</span>
+            <span sec:authorize="hasRole('USER')" >USER</span>
+        </h1>
 
 
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -188,6 +192,8 @@
 
 
         <script>
+            // Get the user's role from the element with id="USER_ROLE"
+            const userRole = $("#USER_ROLE span").text().trim();
             function searchTracks() {
                 const query = $("#searchTrackInput").val(); // Get the search input value
 
@@ -203,6 +209,12 @@
                         if (data.length > 0) {
                             // Loop through the returned tracks and create table rows
                             data.forEach((track, index) => {
+
+                                // Only show the Edit button if the user's role is ADMIN
+                                const editButton = userRole === "ADMIN"
+                                    ? `<a href="/tracks/edit/${track.id}" class="btn btn-sm btn-primary">Edit</a>`
+                                    : "";
+
                                 const row = `
                             <tr>
                                 <td>${index + 1}</td>
@@ -211,7 +223,7 @@
                                 <td>${track.album?.name || ""}</td>
                                 <td>${track.album?.artist || ""}</td>
                                 <td>
-                                    <a href="/tracks/edit/${track.id}" class="btn btn-sm btn-primary">Edit</a>
+                                      ${editButton}
                                     <a href="/player/music/${track.id}" class="btn btn-sm btn-success">Play</a>
                                     <button class="btn btn-sm btn-secondary"
                                             data-bs-toggle="modal"
