@@ -163,7 +163,8 @@ public class AuthController {
 
     @GetMapping("/profile")
     public String viewProfile(Model model) {
-        User user = userService.getLoggedInUser();
+        User loggedInUser = userService.getLoggedInUser();
+        User user = userService.findById(loggedInUser.getId());
         user.setPlaylists(playlistService.getPlaylistsByUser(user));
         model.addAttribute("user", user);
         return "profile";
@@ -185,8 +186,9 @@ public class AuthController {
             user = (User) model.getAttribute("user"); // Retrieve flash attribute
             System.out.println("User from model attribute: " + user);
             if (user == null) {
-                user = userService.getLoggedInUser(); // Fallback to logged-in user
-                System.out.println("Logged-in user: " + user);
+                User loggedInUser = userService.getLoggedInUser();
+                user = userService.findById(loggedInUser.getId());
+                System.out.println("Logged-in user: " + user.getRole());
             }
         }
         model.addAttribute("user", user);
@@ -206,6 +208,7 @@ public class AuthController {
             Model model, RedirectAttributes redirectAttributes) {
 
         Map<String, String> formData = new HashMap<>();
+        formData.put("id", id.toString());
         formData.put("username", username);
         formData.put("email", email);
         formData.put("displayName", displayName);
@@ -214,8 +217,6 @@ public class AuthController {
         // Add formData back to the model to retain user inputs
         model.addAttribute("user", formData);
 
-
-//        User user = userService.getLoggedInUser();
 
         User user = userService.findById(id);
 
@@ -231,6 +232,28 @@ public class AuthController {
             model.addAttribute("error", "Email already used, try another email");
             return "edit-profile";
         }
+
+
+
+        // Validations
+        if (username == null || username.trim().isEmpty()) {
+            model.addAttribute("error", "Username is required.");
+            return "edit-profile";
+        }
+
+
+        if (email == null || email.trim().isEmpty()) {
+            model.addAttribute("error", "Email is required.");
+            return "edit-profile";
+        }
+
+
+        if (displayName == null || displayName.trim().isEmpty()) {
+            model.addAttribute("error", "Display Name is required.");
+            return "edit-profile";
+        }
+
+
 
 
         // Update user details

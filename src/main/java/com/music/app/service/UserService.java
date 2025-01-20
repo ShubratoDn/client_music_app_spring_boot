@@ -4,6 +4,7 @@ package com.music.app.service;
 import com.music.app.config.security.CustomUserDetails;
 import com.music.app.entity.User;
 import com.music.app.repository.UserRepo;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,6 +32,7 @@ public class UserService {
         return userRepo.findByUsernameOrEmail(username, email);
     }
 
+    @Transactional
     public User findById(Long id) {
         return userRepo.findById(id).orElse(null);
     }
@@ -43,6 +45,7 @@ public class UserService {
         return userRepo.findByEmail(email);
     }
 
+    @Transactional
     public User saveUser(User user) {
         User save = userRepo.save(user);
         return save;
