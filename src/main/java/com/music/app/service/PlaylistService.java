@@ -76,4 +76,8 @@ public class PlaylistService {
                 .orElseThrow(() -> new EntityNotFoundException("Playlist not found"));
         playlistRepository.delete(playlist);
     }
+
+    public List<Playlist> searchPlaylists(String query) {
+        return playlistRepository.findByNameContainingIgnoreCase(query);
+    }
 }

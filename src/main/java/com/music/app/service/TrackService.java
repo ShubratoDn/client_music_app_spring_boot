@@ -151,4 +151,8 @@ public class TrackService {
         return tracks;
     }
 
+    public List<Track> searchTracks2(String query) {
+        return trackRepository.findByNameContainingIgnoreCaseOrAlbum_NameContainingIgnoreCase(query, query);
+    }
+
 }

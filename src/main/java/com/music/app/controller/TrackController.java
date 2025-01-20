@@ -2,6 +2,7 @@ package com.music.app.controller;
 
 import com.music.app.entity.Track;
 import com.music.app.service.AlbumService;
+import com.music.app.service.PlaylistService;
 import com.music.app.service.TrackService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +13,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/tracks")
@@ -22,6 +25,8 @@ public class TrackController {
     private TrackService trackService;
     @Autowired
     private AlbumService albumService;
+    @Autowired
+    private PlaylistService playlistService;
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/upload")
@@ -179,6 +184,23 @@ public class TrackController {
         }
         System.out.println("====================");
         return ResponseEntity.ok(tracks);
+    }
+
+
+
+    @GetMapping("/search-track")
+    public String searchTrack() {
+        return "search-track";
+    }
+
+    @GetMapping("/search2")
+    @ResponseBody
+    public Map<String, List<?>> searchEntities(@RequestParam String query) {
+        Map<String, List<?>> results = new HashMap<>();
+        results.put("tracks", trackService.searchTracks2(query));
+        results.put("albums", albumService.searchAlbums(query));
+        results.put("playlists", playlistService.searchPlaylists(query));
+        return results;
     }
 
 }

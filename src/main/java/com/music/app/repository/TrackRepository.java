@@ -12,4 +12,6 @@ public interface TrackRepository extends JpaRepository<Track, Long> {
     public List<Track> findByPlaylists(Playlist playlist);
 
     List<Track> findByNameContainingIgnoreCase(String query);
+
+    List<Track> findByNameContainingIgnoreCaseOrAlbum_NameContainingIgnoreCase(String name, String albumName);
 }

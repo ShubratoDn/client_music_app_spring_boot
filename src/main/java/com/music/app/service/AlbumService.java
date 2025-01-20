@@ -53,4 +53,8 @@ public class AlbumService {
     public Album getAlbumById(Long id) {
         return albumRepository.findById(id).orElse(null);
     }
+
+    public List<Album> searchAlbums(String query) {
+        return albumRepository.findByNameContainingIgnoreCaseOrArtistContainingIgnoreCase(query, query);
+    }
 }
