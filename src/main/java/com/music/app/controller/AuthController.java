@@ -6,16 +6,16 @@ import com.music.app.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -68,7 +68,7 @@ public class AuthController {
             @RequestParam("confirmPassword") String confirmPassword,
             @RequestParam("email") String email,
             @RequestParam("displayName") String displayName,
-            @RequestParam("role") String role,
+//            @RequestParam("role") String role,
             @RequestParam("profilePicture") MultipartFile profilePicture,
             Model model, RedirectAttributes redirectAttributes) {
 
@@ -76,7 +76,7 @@ public class AuthController {
         formData.put("username", username);
         formData.put("email", email);
         formData.put("displayName", displayName);
-        formData.put("role", role);
+//        formData.put("role", role);
 
         // Add formData back to the model to retain user inputs
         model.addAttribute("formData", formData);
@@ -132,7 +132,7 @@ public class AuthController {
         // TODO: Save the user details and handle the profile picture
         System.out.println("Username: " + username);
         System.out.println("Email: " + email);
-        System.out.println("Role: " + role);
+//        System.out.println("Role: " + role);
         System.out.println("Profile Picture: " + (profilePicture != null ? profilePicture.getOriginalFilename() : "No file uploaded"));
 
         User user = new User();
@@ -140,8 +140,8 @@ public class AuthController {
         user.setPassword(password);
         user.setEmail(email);
         user.setDisplayName(displayName);
-        user.setRole(User.Role.valueOf(role.toUpperCase()));
-
+//        user.setRole(User.Role.valueOf(role.toUpperCase()));
+        user.setRole(User.Role.USER);
         // If validation passes, proceed with saving the album
         if(profilePicture != null){
             try {
@@ -169,19 +169,37 @@ public class AuthController {
         return "profile";
     }
 
+    @GetMapping("/users/edit-profile/{userId}")
+    public String showEditProfileX(@PathVariable("userId") Long userId, RedirectAttributes redirectAttributes) {
+        User user = userService.findById(userId);
+        System.out.println("User fetched by ID (" + userId + "): " + user);
+        redirectAttributes.addFlashAttribute("user", user); // Pass user as flash attribute
+        return "redirect:/edit-profile";
+    }
 
     @GetMapping("/edit-profile")
-    public String showEditProfile(Model model) {
-        model.addAttribute("user", userService.getLoggedInUser());
+    public String showEditProfile(Model model, HttpServletRequest request) {
+        User user = (User) request.getAttribute("user");
+        System.out.println("User from request attribute: " + user);
+        if (user == null) {
+            user = (User) model.getAttribute("user"); // Retrieve flash attribute
+            System.out.println("User from model attribute: " + user);
+            if (user == null) {
+                user = userService.getLoggedInUser(); // Fallback to logged-in user
+                System.out.println("Logged-in user: " + user);
+            }
+        }
+        model.addAttribute("user", user);
         return "edit-profile";
     }
 
     @PostMapping("/edit-profile")
     public String updateProfile(
+            @RequestParam("id") Long id,
             @RequestParam("username") String username,
             @RequestParam("email") String email,
             @RequestParam("displayName") String displayName,
-            @RequestParam("role") String role,
+            @RequestParam(value = "role", required = false) String role,
             @RequestParam(value = "password", required = false) String password,
             @RequestParam(value = "confirmPassword", required = false) String confirmPassword,
             @RequestParam(value = "profilePicture", required = false) MultipartFile profilePicture,
@@ -197,7 +215,9 @@ public class AuthController {
         model.addAttribute("user", formData);
 
 
-        User user = userService.getLoggedInUser();
+//        User user = userService.getLoggedInUser();
+
+        User user = userService.findById(id);
 
         User dbUsername = userService.findByUsername(username);
         User dbEmail = userService.findByEmail(email);
@@ -217,7 +237,10 @@ public class AuthController {
         user.setUsername(username);
         user.setEmail(email);
         user.setDisplayName(displayName);
-        user.setRole(User.Role.valueOf(role.toUpperCase()));
+        if(role != null){
+            user.setRole(User.Role.valueOf(role.toUpperCase()));
+        }
+
 
         // Validate and update password
         if (password != null && !password.isEmpty()) {
@@ -265,5 +288,21 @@ public class AuthController {
         redirectAttributes.addFlashAttribute("success", "Profile updated successfully!");
         return "redirect:/profile";
     }
+
+
+    // Controller
+    @GetMapping("/users")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public String listUsers(Model model) {
+        return "users";
+    }
+
+    @GetMapping("/users/search")
+    @ResponseBody
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public List<User> searchUsers(@RequestParam String query) {
+        return userService.searchUsers(query);
+    }
+
 
 }

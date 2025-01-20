@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -28,6 +29,10 @@ public class UserService {
 
     public User findByUsernameOrEmail(String username, String email) {
         return userRepo.findByUsernameOrEmail(username, email);
+    }
+
+    public User findById(Long id) {
+        return userRepo.findById(id).orElse(null);
     }
 
     public User findByUsername(String username){
@@ -69,5 +74,10 @@ public class UserService {
         }
 
         return "/uploads/userImages/" + fileName;
+    }
+
+
+    public List<User> searchUsers(String query) {
+        return userRepo.findByUsernameContainingIgnoreCaseOrEmailContainingIgnoreCase(query, query);
     }
 }

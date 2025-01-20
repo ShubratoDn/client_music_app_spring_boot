@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="base::layout(~{::title}, ~{::main})">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:replace="base::layout(~{::title}, ~{::main})">
     <head>
         <title>Music App</title>
     </head>
@@ -17,6 +17,9 @@
                             <form th:action="@{/edit-profile}" method="post" enctype="multipart/form-data">
                                 <!-- Display error message -->
                                 <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+                                <input class="form-control" name="id" type="hidden"
+                                       th:value="${user.id}" />
 
                                 <!-- Username (Read-Only) -->
                                 <div class="form-floating mb-3">
@@ -39,8 +42,8 @@
                                     <label for="displayName">Display Name</label>
                                 </div>
 
-                                <!-- Role -->
-                                <div class="form-floating mb-3">
+<!--                                &lt;!&ndash; Role &ndash;&gt;-->
+                                <div class="form-floating mb-3" sec:authorize="hasRole('ADMIN')">
                                     <select class="form-select" id="role" name="role">
                                         <option value="USER" th:selected="${user.role == 'USER'}">User</option>
                                         <option value="ADMIN" th:selected="${user.role == 'ADMIN'}">Admin</option>

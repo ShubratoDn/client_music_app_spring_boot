@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="base::layout(~{::title}, ~{::main})">
+<head>
+    <title>Music App</title>
+</head>
+<body>
+
+<main>
+    <div class="container mt-4">
+        <h1 class="mb-4">Users</h1>
+        <div class="mb-3">
+            <input type="text" id="search" class="form-control" placeholder="Search by username or email">
+        </div>
+        <div id="user-cards" class="row row-cols-1 row-cols-md-4 g-4">
+            <!-- Cards will be loaded here -->
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            const loadUsers = (query = "") => {
+                $.ajax({
+                    url: "/users/search",
+                    method: "GET",
+                    data: {query},
+                    success: function (users) {
+                        const userCards = users.map(user => `
+                        <div class="col">
+                            <div class="card h-100">
+                                <img style="max-height: 100px; object-fit: contain" src="${user.profilePictureUrl || 'https://media.istockphoto.com/id/1300845620/vector/user-icon-flat-isolated-on-white-background-user-symbol-vector-illustration.jpg?s=612x612&w=0&k=20&c=yBeyba0hUkh14_jgv1OKqIH0CCSWU_4ckRkAoy2p73o='}" class="card-img-top" alt="Profile Picture">
+                                <div class="card-body">
+                                    <h5 class="card-title">${user.displayName || user.username}</h5>
+                                    <p class="card-text m-0">Email: ${user.email}</p>
+                                    <p class="card-text">Role: ${user.role}</p>
+                                    <a class="btn btn-success" href="/users/edit-profile/${user.id}"><i class="fas fa-edit"></i> Edit</a>
+                                </div>
+                            </div>
+                        </div>`).join("");
+
+                        $("#user-cards").html(userCards);
+                    }
+                });
+            };
+
+            $("#search").on("input", function () {
+                const query = $(this).val();
+                loadUsers(query);
+            });
+
+            loadUsers(); // Initial load
+        });
+    </script>
+</main>
+
+
+</body>
+</html>
