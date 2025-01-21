@@ -15,6 +15,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -70,7 +71,18 @@ public class PlaylistController {
         // Fetch playlists for the user
         List<Playlist> playlists = playlistService.getPlaylistsByUser(user);
 
-        return ResponseEntity.ok(playlists);
+        List<Playlist> updatedPlaylist = new ArrayList<>();
+        for (Playlist playlist : playlists){
+            List<Track> tracks = new ArrayList<>();
+            for(Track track : playlist.getTracks()){
+                track.setPlaylists(null);
+                tracks.add(track);
+            }
+            playlist.setTracks(tracks);
+            playlist.setUser(null);
+            updatedPlaylist.add(playlist);
+        }
+        return ResponseEntity.ok(updatedPlaylist);
     }
 
 

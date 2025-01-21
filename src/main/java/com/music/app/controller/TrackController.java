@@ -1,5 +1,6 @@
 package com.music.app.controller;
 
+import com.music.app.entity.Playlist;
 import com.music.app.entity.Track;
 import com.music.app.service.AlbumService;
 import com.music.app.service.PlaylistService;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -199,7 +201,24 @@ public class TrackController {
         Map<String, List<?>> results = new HashMap<>();
         results.put("tracks", trackService.searchTracks2(query));
         results.put("albums", albumService.searchAlbums(query));
-        results.put("playlists", playlistService.searchPlaylists(query));
+
+
+        List<Playlist> playlists = playlistService.searchPlaylists(query);
+
+        List<Playlist> updatedPlaylist = new ArrayList<>();
+        for (Playlist playlist : playlists){
+            List<Track> tracks = new ArrayList<>();
+            for(Track track : playlist.getTracks()){
+                track.setPlaylists(null);
+                track.setAlbum(null);
+                tracks.add(track);
+            }
+            playlist.setTracks(tracks);
+            playlist.setUser(null);
+            updatedPlaylist.add(playlist);
+        }
+
+        results.put("playlists", updatedPlaylist);
         return results;
     }
 
