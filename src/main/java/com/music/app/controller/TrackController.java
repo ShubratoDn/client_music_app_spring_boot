@@ -197,8 +197,12 @@ public class TrackController {
 
     @GetMapping("/search2")
     @ResponseBody
-    public Map<String, List<?>> searchEntities(@RequestParam String query) {
+    public Map<String, List<?>> searchEntities(@RequestParam (required = false) String query) {
         Map<String, List<?>> results = new HashMap<>();
+        if (query == null || query.isBlank()) {
+            results.put("tracks", trackService.getAllTracks());
+            return results;
+        }
         results.put("tracks", trackService.searchTracks2(query));
         results.put("albums", albumService.searchAlbums(query));
 

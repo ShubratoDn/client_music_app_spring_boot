@@ -6,7 +6,7 @@
     <body>
 
     <main>
-        <div class="container m-4">
+        <div class="container p-4">
             <h1 class="mb-4">Search</h1>
             <div class="mb-3">
                 <input type="text" id="searchInput" class="form-control" placeholder="Search by track, artist, album, or playlist" onkeyup="searchQuery()">
@@ -61,11 +61,12 @@
 
 <!--        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>-->
         <script>
-            // $(document).ready(function () {
-            //     $('#searchInput').on('input', function () {
-            //         searchQuery()
-            //     });
-            // });
+            $(document).ready(function () {
+                // $('#searchInput').on('input', function () {
+                //     searchQuery()
+                // });
+                searchQuery();
+            });
 
 
             function searchQuery(){
@@ -89,7 +90,7 @@
             function renderResults(data) {
                 let html = '';
 
-                if (data.tracks.length > 0) {
+                if (data.tracks && data.tracks.length > 0) {
                     html += '<h2 class="mb-3">Tracks</h2><div class="row row-cols-1 row-cols-md-4 g-4">';
                     data.tracks.forEach(track => {
                         html += `<div class="col">
@@ -101,7 +102,7 @@
                             </div>
                             <div class="card-footer">
                             <a href="/player/music/${track.id}" class="btn btn-success">Play</a>
-                            <button class="btn btn-sm btn-secondary add-to-playlist-btn"
+                            <button class="btn btn-sm btn-secondary add-to-playlist-btn btn-sm"
                                             data-bs-toggle="modal"
                                             data-bs-target="#addToPlaylistModal"
                                             data-track-id="${track.id}">
@@ -114,7 +115,7 @@
                     html += '</div>';
                 }
 
-                if (data.albums.length > 0) {
+                if (data.albums && data.albums.length > 0) {
                     html += '<h2 class="my-3">Albums</h2><div class="row row-cols-1 row-cols-md-3 g-4">';
                     data.albums.forEach(album => {
                         html += `<div class="col">
@@ -132,7 +133,7 @@
                     html += '</div>';
                 }
 
-                if (data.playlists.length > 0) {
+                if (data.playlists && data.playlists.length > 0) {
                     html += '<h2 class="my-3">Playlists</h2><div class="row row-cols-1 row-cols-md-3 g-4">';
                     data.playlists.forEach(playlist => {
                         html += `<div class="col">
@@ -165,7 +166,7 @@
                 const trackId = $(this).data('track-id'); // Get the track ID from the data attribute
                 selectedTrackId = trackId;
                 $('#trackId').val(selectedTrackId);
-                alert(`Selected Track ID: ${selectedTrackId}`); // Display the track ID in an alert
+                // alert(`Selected Track ID: ${selectedTrackId}`); // Display the track ID in an alert
             });
 
 
