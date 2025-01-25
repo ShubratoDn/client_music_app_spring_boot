@@ -95,5 +95,23 @@ public class AlbumController {
     }
 
 
+    @GetMapping("/delete/{id}")
+    public String deleteAlbum(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
+        Album album = albumService.getAlbumById(id);
+        if (album == null) {
+            redirectAttributes.addFlashAttribute("error", "Album not found!");
+            return "redirect:/albums"; // Redirect to album list if the album doesn't exist
+        }
+
+        try {
+            albumService.deleteAlbum(id);
+            redirectAttributes.addFlashAttribute("success", "Album deleted successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to delete album: " + e.getMessage());
+        }
+
+        return "redirect:/albums"; // Redirect to album list after deletion
+    }
+
 
 }

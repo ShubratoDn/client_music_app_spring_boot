@@ -60,6 +60,7 @@
                                         th:attr="data-track-id=${track.id}">
                                     Add to Playlist
                                 </button>
+                                <a sec:authorize="hasRole('ADMIN')" th:href="@{/tracks/delete/{id}(id=${track.id})}" class="btn btn-sm btn-danger">Delete</a>
                             </td>
                         </tr>
                         </tbody>
@@ -215,6 +216,12 @@
                                     ? `<a href="/tracks/edit/${track.id}" class="btn btn-sm btn-primary">Edit</a>`
                                     : "";
 
+                                // Only show the Edit button if the user's role is ADMIN
+                                const deleteButton = userRole === "ADMIN"
+                                    ? `<a href="/tracks/delete/${track.id}" class="btn btn-sm btn-danger">Delete</a>`
+                                    : "";
+
+
                                 const row = `
                             <tr>
                                 <td>${index + 1}</td>
@@ -231,6 +238,7 @@
                                             data-track-id="${track.id}">
                                         Add to Playlist
                                     </button>
+                                    ${deleteButton}
                                 </td>
                             </tr>`;
                                 tableBody.append(row); // Append each row to the table body

@@ -155,4 +155,10 @@ public class TrackService {
         return trackRepository.findByNameContainingIgnoreCaseOrAlbum_NameContainingIgnoreCase(query, query);
     }
 
+    public void deleteTrack(Long id) {
+
+        albumRepository.deleteTrackFromAlbum(id, id);
+        playlistRepository.deleteByTracks_Id(id);
+        trackRepository.deleteById(id);
+    }
 }

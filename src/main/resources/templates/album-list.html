@@ -13,6 +13,17 @@
                 </ol>
                 <div class="card mb-4">
                     <div class="card-body">
+                        <!-- Success Alert -->
+                        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                            <span th:text="${success}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+
+                        <!-- Error Alert -->
+                        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <span th:text="${error}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
                         <div class="row">
                             <!-- Iterate over the albums -->
                             <div class="col-sm-6 col-md-4" th:each="album : ${albums}">
@@ -31,9 +42,10 @@
                                         <p class="card-text">Track Count: <span th:text="${album.getTracks().size()}">--</span></p>
                                         <!-- View Album Button -->
                                         <a th:href="@{/albums/view/{id}(id=${album.id})}"
-                                           class="btn btn-primary">View Album</a>
+                                           class="btn btn-sm btn-primary">View Album</a>
 
-                                        <a th:href="@{/player/album/{id}(id=${album.id})}" class="btn btn-success">Play the album</a>
+                                        <a th:href="@{/player/album/{id}(id=${album.id})}" class="btn btn-sm btn-success">Play the album</a>
+                                        <a sec:authorize="hasRole('ADMIN')" th:href="@{/albums/delete/{id}(id=${album.id})}" class="btn btn-sm btn-danger">Delete</a>
                                     </div>
                                 </div>
                             </div>

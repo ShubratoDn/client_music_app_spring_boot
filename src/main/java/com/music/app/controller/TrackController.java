@@ -226,4 +226,17 @@ public class TrackController {
         return results;
     }
 
+
+    @GetMapping("/delete/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public String deleteTrack(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            trackService.deleteTrack(id);
+            redirectAttributes.addFlashAttribute("success", "Track deleted successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to delete track: " + e.getMessage());
+        }
+
+        return "redirect:/tracks";
+    }
 }

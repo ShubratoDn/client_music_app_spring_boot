@@ -2,6 +2,9 @@ package com.music.app.service;
 
 import com.music.app.entity.Album;
 import com.music.app.repository.AlbumRepository;
+import com.music.app.repository.TrackRepository;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,6 +21,9 @@ import java.util.UUID;
 public class AlbumService {
 
     private final AlbumRepository albumRepository;
+
+    @Autowired
+    private TrackRepository trackRepository;
 
     public AlbumService(AlbumRepository albumRepository) {
         this.albumRepository = albumRepository;
@@ -56,5 +62,15 @@ public class AlbumService {
 
     public List<Album> searchAlbums(String query) {
         return albumRepository.findByNameContainingIgnoreCaseOrArtistContainingIgnoreCase(query, query);
+    }
+
+
+    @Transactional
+    public void deleteAlbum(Long albumId) {
+        // Step 1: Disassociate all tracks from the album
+        trackRepository.removeTracksFromAlbum(albumId);
+
+        // Step 2: Delete the album
+        albumRepository.deleteById(albumId);
     }
 }
