@@ -44,7 +44,6 @@ public class Playlist {
     }
 
     public User getUser() {
-        this.user.setPlaylists(null);
         return user;
     }
 

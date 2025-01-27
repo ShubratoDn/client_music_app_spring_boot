@@ -17,4 +17,6 @@ public interface PlaylistRepository extends JpaRepository<Playlist, Long> {
     @Modifying
     @Transactional
     void deleteByTracks_Id(Long trackId);
+
+    List<Playlist> findByTracks_Id(Long trackId);
 }

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -324,7 +325,13 @@ public class AuthController {
     @ResponseBody
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public List<User> searchUsers(@RequestParam String query) {
-        return userService.searchUsers(query);
+        List<User> users = userService.searchUsers(query);
+        List<User> updatedUsers = new ArrayList<>();
+        for(User user: users){
+            user.setPlaylists(null);
+            updatedUsers.add(user);
+        }
+        return updatedUsers;
     }
 
 

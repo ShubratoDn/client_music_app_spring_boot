@@ -9,6 +9,7 @@ import com.music.app.entity.Track;
 import com.music.app.repository.AlbumRepository;
 import com.music.app.repository.PlaylistRepository;
 import com.music.app.repository.TrackRepository;
+import jakarta.transaction.Transactional;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.AudioHeader;
@@ -158,7 +159,19 @@ public class TrackService {
     public void deleteTrack(Long id) {
 
         albumRepository.deleteTrackFromAlbum(id, id);
-        playlistRepository.deleteByTracks_Id(id);
+        this.removeTrackFromPlaylist(id);
         trackRepository.deleteById(id);
     }
+
+    @Transactional
+    public void removeTrackFromPlaylist(Long trackId) {
+        List<Playlist> playlists = playlistRepository.findByTracks_Id(trackId);
+        for (Playlist playlist : playlists) {
+            Track track = trackRepository.findById(trackId).orElseThrow();
+
+            playlist.getTracks().remove(track);
+            playlistRepository.save(playlist);
+        }
+    }
+
 }
